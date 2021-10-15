@@ -1,0 +1,16 @@
+.App {
+  font-family: sans-serif;
+  /* text-align: center; */
+  max-width: 80ch;
+  margin: 0 auto;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+section {
+  padding: 2px 20px 20px;
+  background: lightgray;
+}
