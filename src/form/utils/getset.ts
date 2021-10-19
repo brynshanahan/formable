@@ -89,8 +89,6 @@ export function remove (obj: AnyObj, path: Path, value: any) {
   if (!Array.isArray(arr)) return
   let index = arr.indexOf(value)
 
-  console.log(index, arr)
-
   if (index === -1) return
 
   arr.splice(index, 1)

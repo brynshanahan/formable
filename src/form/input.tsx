@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useEffect, useLayoutEffect, useRef } from "react";
 import { useSelectable } from "@selkt/react";
 import { useForm } from "./form";
-import { del, get, push, remove, set, setDefault, splice } from "./utils/getset";
+import { del, get, push, remove, set } from "./utils/getset";
 import { InputComponents, InputProps, InputTypes } from "./types";
 import { Path, PathContext, usePath } from "./path";
 import { useIdentity } from './hooks/use-identity';
@@ -122,7 +122,7 @@ export function useInput<ValueType>(
   useLayoutEffect(() => {
     if (hasExternValue) {
       form.set((state) => {
-        set(state, path, valueInForm, clean);
+        set(state, path, externalValue, clean);
       });
     }
 
@@ -131,7 +131,7 @@ export function useInput<ValueType>(
     because that would unintentionally reset the users value 
     */
     // eslint-disable-next-line
-  }, [valueInForm, path, form, hasExternValue]);
+  }, [externalValue, path, form, hasExternValue]);
 
   /* Just run clean again when it is toggled */
   useLayoutEffect(() => {
@@ -209,5 +209,3 @@ export function Input<ValueType = string, CompType extends InputComponents<Value
     </PathContext.Provider>
   );
 }
-
-<Input type="text" value={true} prop=""></Input>
