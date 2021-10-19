@@ -33,7 +33,7 @@ function UserFields({ prop }: { prop?: string }) {
           </Input>
         </Label>
 
-        <WithField path="email">
+        <WithField prop="email">
           {(val) =>
             !!val && (
               <Label label="Recieve promotions">
@@ -46,7 +46,11 @@ function UserFields({ prop }: { prop?: string }) {
         </WithField>
 
         <Label label="Age">
-          <Input prop="age" type="number" clean />
+          <Input prop="age" type="number" clean >
+            <Validator<number> isValid={age => age >= 18}>
+              User must be at least 18 years old
+            </Validator>
+          </Input>
         </Label>
       </section>
     </Group>

@@ -29,10 +29,10 @@ type WithFieldRestProps = {
 };
 export function WithField(
   props: WithFieldPropProps & WithFieldRestProps
-): ReactNode;
+): JSX.Element;
 export function WithField(
   props: WithFieldPathProps & WithFieldRestProps
-): ReactNode;
+): JSX.Element;
 export function WithField({
   path,
   prop,

@@ -1,6 +1,7 @@
 import { useSelectable } from "@selkt/react";
 import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { useForm } from "./form";
+import { useIdentity } from './hooks/use-identity';
 import { Path, PathType, usePath } from "./path";
 import { del, get, set } from "./utils/getset";
 
@@ -30,14 +31,14 @@ export function Validator<T>({
   isValid?: (type: T) => undefined | boolean;
   children: ReactNode | string;
 }) {
-  const refId = useRef();
+  const identity = useIdentity();
   const form = useForm();
   const path = usePath(prop);
   const dirty = useDirty(path);
   const p = Path.toString(path);
   const errors = useSelectable(form, (state) => state.meta[p]?.errors);
   const hasError = useMemo(
-    () => errors && errors.find((ref) => ref[0] === refId),
+    () => errors && errors.find((ref) => ref[0] === identity),
     [errors]
   );
 
@@ -59,7 +60,7 @@ export function Validator<T>({
         const isValueValid = isValid(value);
 
         let errorIndex = form.state.meta[p]?.errors?.findIndex(
-          (err) => err[0] === refId
+          (err) => err[0] === identity
         );
 
         if (!isValueValid) {
@@ -72,7 +73,7 @@ export function Validator<T>({
               state.meta[p].errors[errorIndex][1] = children;
             } else {
               /* Add the current error */
-              state.meta[p].errors.push([refId, children]);
+              state.meta[p].errors.push([identity, children]);
             }
           });
         } else {
@@ -95,7 +96,7 @@ export function Validator<T>({
   useEffect(() => {
     if (!dirty) {
       const errorIndex = form.state.meta[p]?.errors?.findIndex(
-        (err) => err[0] === refId
+        (err) => err[0] === identity
       );
       form.set((state) => {
         if (hasIndex(errorIndex)) {
@@ -112,7 +113,7 @@ export function Validator<T>({
   useEffect(() => {
     return () => {
       const errorIndex = form.state.meta[p]?.errors?.findIndex(
-        (err) => err[0] === refId
+        (err) => err[0] === identity
       );
       form.set((state) => {
         if (hasIndex(errorIndex)) {

@@ -1,9 +1,10 @@
 import React, { ChangeEvent, useEffect, useLayoutEffect, useRef } from "react";
 import { useSelectable } from "@selkt/react";
 import { useForm } from "./form";
-import { del, get, set } from "./utils/getset";
+import { del, get, push, remove, set, setDefault, splice } from "./utils/getset";
 import { InputComponents, InputProps, InputTypes } from "./types";
 import { Path, PathContext, usePath } from "./path";
+import { useIdentity } from './hooks/use-identity';
 function isCheckedInputType(type: string) {
   return type === "radio" || type === "checkbox";
 }
@@ -38,25 +39,20 @@ function hasInitialValue(props: any) {
   );
 }
 
-export function useInput<ValueType, CompType>(
-  props: InputProps<ValueType, CompType>
+export function useInput<ValueType>(
+  props: InputProps<ValueType>
 ) {
   const {
-    type,
     prop,
     value: externalValue,
     initialValue = externalValue,
     clean = false,
-    checked,
-    initialChecked = checked
   } = props;
+
+  const identity = useIdentity()
   const path = usePath(prop);
   const form = useForm();
   const p = Path.toString(path);
-
-  const isCheckedType = isCheckedInputType(type);
-
-  const externalFormValue = isCheckedType ? checked : externalValue;
 
   const valueInForm = useSelectable(form, (state) => get(state, path)) || "";
 
@@ -72,25 +68,36 @@ export function useInput<ValueType, CompType>(
     /* Track dirty state of fields */
     if (form.state !== prev) {
       form.set((state) => {
-        if (!get(state.meta, [p, "dirty"])) {
-          set(state.meta, [p, "dirty"], true);
+        if (get(state.meta, [p, "dirty"])) {
+          set(state.meta, [p, "dirty"], false);
         }
       });
     }
   }
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     form.set((state) => {
+      push(state.meta, [p, 'refs'], identity)
       set(state.meta, [p, "dirty"], false);
     });
-  }, [valueInForm, form, p]);
+    return () => {
+      console.log('unset', identity)
+      form.set((state) => {
+        remove(state.meta, [p, 'refs'], identity)
+        if (!state.meta[p].refs.length) {
+          del(state.meta, [p], clean);
+          del(state, path, clean);
+        }
+      });
+    };
+  }, [path, form, p]);
 
   /* Update the form to the initial value when the field changes:
     - path
     - form parent
     - clean status
    */
-  const initialValueRef = useRef(isCheckedType ? initialChecked : initialValue);
+  const initialValueRef = useRef(initialValue);
   useLayoutEffect(() => {
     if (hasInitialValue(props)) {
       const initialValue = initialValueRef.current;
@@ -115,7 +122,7 @@ export function useInput<ValueType, CompType>(
   useLayoutEffect(() => {
     if (hasExternValue) {
       form.set((state) => {
-        set(state, path, externalFormValue, clean);
+        set(state, path, valueInForm, clean);
       });
     }
 
@@ -124,7 +131,7 @@ export function useInput<ValueType, CompType>(
     because that would unintentionally reset the users value 
     */
     // eslint-disable-next-line
-  }, [externalFormValue, path, form, hasExternValue]);
+  }, [valueInForm, path, form, hasExternValue]);
 
   /* Just run clean again when it is toggled */
   useLayoutEffect(() => {
@@ -133,32 +140,19 @@ export function useInput<ValueType, CompType>(
     });
   }, [form, path, clean]);
 
-  useEffect(() => {
-    return () => {
-      form.set((state) => {
-        const p = Path.toString(path);
-        if (clean) {
-          del(state.meta, [p], clean);
-          del(state, path, clean);
-        }
-      });
-    };
-    // eslint-disable-next-line
-  }, [path, form]);
-
   const elementProps = {
     value: valueInForm,
     onChange: onChangeHandler,
     name: Path.toString(path),
     onFocus: () => {
       form.set((state) => {
-        set(state.meta, [Path.toString(path), "focus"], true);
+        set(state.meta, [p, "focus"], true);
       });
     },
     onBlur: () => {
       form.set((state) => {
-        set(state.meta, [Path.toString(path), "focus"], false);
-        set(state.meta, [Path.toString(path), "dirty"], true);
+        set(state.meta, [p, "focus"], false);
+        set(state.meta, [p, "dirty"], true);
       });
     }
   };
@@ -166,25 +160,40 @@ export function useInput<ValueType, CompType>(
   return elementProps;
 }
 
-export function Input<ValueType, CompType extends InputComponents<ValueType>>({
-  as: Component = "input",
+export function Input<ValueType = string, CompType extends InputComponents<ValueType> = "input">({
+  as: Component = "input" as CompType,
   type = "text",
   prop,
   children,
+  value,
+  clean = false,
   ...rest
 }: InputProps<ValueType, CompType>) {
   const path = usePath(prop);
-  const { onChange, ...props } = useInput<ValueType, CompType>({
+  
+  const { onChange, value: formValue, ...props } = useInput<ValueType>({
     as: Component,
     prop,
-    value: type === "checkbox" ? rest.checked : rest.value
+    value: value
   });
 
   function onComponentChange(event: any) {
     const isHTMLElement = typeof Component === "string";
     const valueProp = isCheckedInputType(type) ? "checked" : "value";
     const value = isHTMLElement ? event.target[valueProp] : event;
-    onChange(formatValue(value, type, rest.clean, rest.value));
+    onChange(formatValue(value, type, clean, value));
+  }
+
+  const builtProps = {} as any
+
+  if (typeof type !== 'function') {
+    builtProps.type = type
+  }
+
+  if (isCheckedInputType(type)) {
+    builtProps.checked = formValue
+  } else {
+    builtProps.value = formValue
   }
 
   return (
@@ -192,6 +201,7 @@ export function Input<ValueType, CompType extends InputComponents<ValueType>>({
       <Component
         {...rest}
         {...props}
+        {...builtProps}
         type={type}
         onChange={onComponentChange}
       />
@@ -199,3 +209,5 @@ export function Input<ValueType, CompType extends InputComponents<ValueType>>({
     </PathContext.Provider>
   );
 }
+
+<Input type="text" value={true} prop=""></Input>

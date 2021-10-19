@@ -10,6 +10,7 @@ export interface FormState<
     [path: string]: {
       dirty: boolean;
       focus: true;
+      refs: any[];
       errors: [any /* (Ref ID) */, ReactNode /* ChildrenToRender */][];
     };
   };

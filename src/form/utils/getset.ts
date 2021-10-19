@@ -64,3 +64,34 @@ export function set(
     }
   }
 }
+
+export function push (obj: AnyObj, path: Path, value: any) {
+  if (!get(obj, path)) {
+    set(obj, path, [])
+  }
+
+  const array = get(obj, path) as any[]
+  array.push(value)
+}
+
+export function splice(obj: AnyObj, path: Path, index: number, deleteCount: number, ...values:any[]) {
+  let arr = get(obj, path) as any[]
+  if (!Array.isArray(arr)) {
+    set(obj, path, [])
+    arr = get(obj, path) as any[]
+  }
+  arr.splice(index, deleteCount, ...values)
+}
+
+export function remove (obj: AnyObj, path: Path, value: any) {
+  let arr = get(obj, path) as any[]
+
+  if (!Array.isArray(arr)) return
+  let index = arr.indexOf(value)
+
+  console.log(index, arr)
+
+  if (index === -1) return
+
+  arr.splice(index, 1)
+}
