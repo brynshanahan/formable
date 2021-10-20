@@ -1,8 +1,9 @@
 import { useSelectable } from "@selkt/react";
 import { ReactNode, useMemo } from "react";
 import { useForm } from "./form";
-import { Path, PathType, usePath } from "./path";
-import { get } from "./utils/getset";
+import { usePath } from "./path";
+import { Path, PathType } from "./utils/obj/path/path";
+import { get } from "./utils/obj/get-set/get-set";
 import { renderChildren } from "./utils/renderChildren";
 
 export function WithForm({

@@ -2,8 +2,9 @@ import { useSelectable } from "@selkt/react";
 import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { useForm } from "./form";
 import { useIdentity } from './hooks/use-identity';
-import { Path, PathType, usePath } from "./path";
-import { del, get, set } from "./utils/getset";
+import { usePath } from "./path";
+import { Path, PathType } from "./utils/obj/path/path";
+import { del, get, set } from "./utils/obj/get-set/get-set";
 
 function requiredFn(v: any) {
   return !!v;

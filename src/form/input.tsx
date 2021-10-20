@@ -1,9 +1,10 @@
 import React, { ChangeEvent, useEffect, useLayoutEffect, useRef } from "react";
 import { useSelectable } from "@selkt/react";
 import { useForm } from "./form";
-import { del, get, push, remove, set } from "./utils/getset";
+import { del, get, push, remove, set } from "./utils/obj/get-set/get-set";
 import { InputComponents, InputProps, InputTypes } from "./types";
-import { Path, PathContext, usePath } from "./path";
+import { PathContext, usePath } from "./path";
+import { Path } from "./utils/obj/path/path";
 import { useIdentity } from './hooks/use-identity';
 function isCheckedInputType(type: string) {
   return type === "radio" || type === "checkbox";

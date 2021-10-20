@@ -12,7 +12,7 @@ import { useForm } from "./form";
 import { FormGroup } from "./group";
 import { usePath } from "./path";
 import { InputProps } from "./types";
-import { get, set } from "./utils/getset";
+import { get, set } from "./utils/obj/get-set/get-set";
 import { renderChildren } from "./utils/renderChildren";
 
 const RepeaterItemContext = createContext<{
